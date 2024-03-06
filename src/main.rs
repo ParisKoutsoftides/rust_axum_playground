@@ -9,12 +9,20 @@ use serde_json::{
     json,
 };
 
+use axum::extract::{
+    Query,
+};
+
+use std::collections::HashMap;
+
+
 #[tokio::main]
 async fn main() {
     let app = Router::new()
         .route("/", get(hello_world))
         .route("/testerino", get(testerino))
-        .route("/json", get(json));
+        .route("/json", get(json))
+        .route("/query", get(query));
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
@@ -31,4 +39,9 @@ async fn testerino() -> &'static str {
 
 async fn json() -> Json<Value> {
     Json(json!({ "data": 42 }))
+}
+
+async fn query(Query(params): Query<HashMap<String, String>>) -> Json<Value> {
+    let param_testerino = params.get("paramerino");
+    Json(json!({ "data": param_testerino }))
 }
