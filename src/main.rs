@@ -42,6 +42,6 @@ async fn json() -> Json<Value> {
 }
 
 async fn query(Query(params): Query<HashMap<String, String>>) -> Json<Value> {
-    let param_testerino = params.get("paramerino");
+    let param_testerino = params.get("paramerino").cloned().unwrap_or(String::from("empty"));
     Json(json!({ "data": param_testerino }))
 }
