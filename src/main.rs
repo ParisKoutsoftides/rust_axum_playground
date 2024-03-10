@@ -1,7 +1,8 @@
 use axum::{
-    routing::get,
+    routing::{get, post},
     Router,
     response::Json,
+    extract
 };
 
 use serde_json::{
@@ -14,6 +15,12 @@ use axum::extract::{
 };
 
 use std::collections::HashMap;
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct Message {
+    text: String,
+}
 
 const CONFIG_KEY: &str = "configKey";
 const EMPTY_STR: &str = "empty";
@@ -25,7 +32,9 @@ async fn main() {
         .route("/testerino", get(testerino))
         .route("/json", get(json))
         .route("/query", get(query))
-        .route("/get_config", get(get_config));
+        .route("/get_config", get(get_config))
+        .route("/posterino_string", post(posterino_string))
+        .route("/posterino_json", post(posterino_json));
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
@@ -64,4 +73,12 @@ async fn get_config(Query(params): Query<HashMap<String, String>>) -> Json<Value
     let config_key = params.get(CONFIG_KEY).cloned().unwrap_or(String::from(EMPTY_STR));
     let config_value = config_map.get(&config_key).cloned().unwrap_or(String::from(EMPTY_STR));
     Json(json!({ config_key: config_value }))
+}
+
+async fn posterino_string(extract::Json(message): Json<Message>) -> String {
+    format!("Message: {}", message.text)
+}
+
+async fn posterino_json(extract::Json(message): Json<Message>) -> Json<Value> {
+    Json(json!({ "message": message.text }))
 }
