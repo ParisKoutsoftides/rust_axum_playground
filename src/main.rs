@@ -15,6 +15,8 @@ use axum::extract::{
 
 use std::collections::HashMap;
 
+const CONFIG_KEY: &str = "configKey";
+const EMPTY_STR: &str = "empty";
 
 #[tokio::main]
 async fn main() {
@@ -43,7 +45,7 @@ async fn json() -> Json<Value> {
 }
 
 async fn query(Query(params): Query<HashMap<String, String>>) -> Json<Value> {
-    let param_testerino = params.get("paramerino").cloned().unwrap_or(String::from("empty"));
+    let param_testerino = params.get("paramerino").cloned().unwrap_or(String::from(EMPTY_STR));
     Json(json!({ "data": param_testerino }))
 }
 
@@ -59,7 +61,7 @@ async fn get_config(Query(params): Query<HashMap<String, String>>) -> Json<Value
         "configValue2".to_string(),
     );
 
-    let config_key = params.get("configKey").cloned().unwrap_or(String::from("empty"));
-    let config_value = config_map.get(&config_key).cloned().unwrap_or(String::from("empty"));
+    let config_key = params.get(CONFIG_KEY).cloned().unwrap_or(String::from(EMPTY_STR));
+    let config_value = config_map.get(&config_key).cloned().unwrap_or(String::from(EMPTY_STR));
     Json(json!({ config_key: config_value }))
 }
