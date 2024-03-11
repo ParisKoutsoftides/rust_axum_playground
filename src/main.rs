@@ -2,16 +2,13 @@ use axum::{
     routing::{get, post},
     Router,
     response::Json,
-    extract
+    extract,
+    extract::{Query}
 };
 
 use serde_json::{
     Value,
     json,
-};
-
-use axum::extract::{
-    Query,
 };
 
 use std::collections::HashMap;
@@ -29,7 +26,7 @@ const EMPTY_STR: &str = "empty";
 async fn main() {
     let app = Router::new()
         .route("/", get(hello_world))
-        .route("/testerino", get(testerino))
+        .route("/testerino", get(testerino).post(testerino_post))
         .route("/json", get(json))
         .route("/query", get(query))
         .route("/get_config", get(get_config))
@@ -47,6 +44,10 @@ async fn hello_world() -> &'static str {
 
 async fn testerino() -> &'static str {
     "Testerino!"
+}
+
+async fn testerino_post(extract::Json(message): Json<Message>) -> String {
+    format!("{}", message.text)
 }
 
 async fn json() -> Json<Value> {
