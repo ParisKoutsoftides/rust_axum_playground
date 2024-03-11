@@ -5,14 +5,14 @@ use axum::{
     extract,
     extract::{Query}
 };
-
 use serde_json::{
     Value,
     json,
 };
-
 use std::collections::HashMap;
 use serde::Deserialize;
+use tower_http::trace::{self, TraceLayer};
+use tracing::Level;
 
 #[derive(Deserialize)]
 struct Message {
@@ -24,6 +24,8 @@ const EMPTY_STR: &str = "empty";
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt::init();
+
     let app = Router::new()
         .route("/", get(hello_world))
         .route("/testerino", get(testerino).post(testerino_post))
@@ -31,7 +33,12 @@ async fn main() {
         .route("/query", get(query))
         .route("/get_config", get(get_config))
         .route("/posterino_string", post(posterino_string))
-        .route("/posterino_json", post(posterino_json));
+        .route("/posterino_json", post(posterino_json))
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
+                .on_response(trace::DefaultOnResponse::new().level(Level::INFO))
+        );
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
