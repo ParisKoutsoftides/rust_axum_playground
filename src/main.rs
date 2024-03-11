@@ -13,6 +13,7 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
+use tracing_subscriber::fmt as tracing_sub;
 
 #[derive(Deserialize)]
 struct Message {
@@ -24,7 +25,7 @@ const EMPTY_STR: &str = "empty";
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    tracing_sub::init();
 
     let app = Router::new()
         .route("/", get(hello_world))
