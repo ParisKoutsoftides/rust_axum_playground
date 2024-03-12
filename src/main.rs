@@ -3,7 +3,8 @@ use axum::{
     Router,
     response::Json,
     extract,
-    extract::{Query}
+    extract::{Query},
+    http::StatusCode
 };
 use serde_json::{
     Value,
@@ -46,28 +47,28 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn hello_world() -> &'static str {
-    "Hello, World!"
+async fn hello_world() -> Result<&'static str, StatusCode> {
+    Ok("Hello, World!")
 }
 
-async fn testerino() -> &'static str {
-    "Testerino!"
+async fn testerino() -> Result<&'static str, StatusCode> {
+    Ok("Testerino!")
 }
 
-async fn testerino_post(extract::Json(message): Json<Message>) -> String {
-    format!("{}", message.text)
+async fn testerino_post(extract::Json(message): Json<Message>) -> Result<String, StatusCode> {
+    Ok(format!("{}", message.text))
 }
 
-async fn json() -> Json<Value> {
-    Json(json!({ "data": 42 }))
+async fn json() -> Result<Json<Value>, StatusCode> {
+    Ok(Json(json!({ "data": 42 })))
 }
 
-async fn query(Query(params): Query<HashMap<String, String>>) -> Json<Value> {
+async fn query(Query(params): Query<HashMap<String, String>>) -> Result<Json<Value>, StatusCode> {
     let param_testerino = params.get("paramerino").cloned().unwrap_or(String::from(EMPTY_STR));
-    Json(json!({ "data": param_testerino }))
+    Ok(Json(json!({ "data": param_testerino })))
 }
 
-async fn get_config(Query(params): Query<HashMap<String, String>>) -> Json<Value> {
+async fn get_config(Query(params): Query<HashMap<String, String>>) -> Result<Json<Value>, StatusCode> {
     let mut config_map = HashMap::new();
     config_map.insert(
         "configKey1".to_string(),
@@ -81,13 +82,13 @@ async fn get_config(Query(params): Query<HashMap<String, String>>) -> Json<Value
 
     let config_key = params.get(CONFIG_KEY).cloned().unwrap_or(String::from(EMPTY_STR));
     let config_value = config_map.get(&config_key).cloned().unwrap_or(String::from(EMPTY_STR));
-    Json(json!({ config_key: config_value }))
+    Ok(Json(json!({ config_key: config_value })))
 }
 
-async fn posterino_string(extract::Json(message): Json<Message>) -> String {
-    format!("Message: {}", message.text)
+async fn posterino_string(extract::Json(message): Json<Message>) -> Result<String, StatusCode> {
+    Ok(format!("Message: {}", message.text))
 }
 
-async fn posterino_json(extract::Json(message): Json<Message>) -> Json<Value> {
-    Json(json!({ "message": message.text }))
+async fn posterino_json(extract::Json(message): Json<Message>) -> Result<Json<Value>, StatusCode> {
+    Ok(Json(json!({ "message": message.text })))
 }
