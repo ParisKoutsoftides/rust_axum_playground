@@ -12,9 +12,17 @@ use serde_json::{
 };
 use std::collections::HashMap;
 use serde::Deserialize;
-use tower_http::trace::{self, TraceLayer};
-use tracing::Level;
+use tower_http::classify::{SharedClassifier, StatusInRangeAsFailures, StatusInRangeFailureClass};
+use tower_http::trace::{
+    self,
+    TraceLayer
+};
+use tracing::{
+    Level,
+    error
+};
 use tracing_subscriber::fmt as tracing_sub;
+use std::time::Duration;
 
 #[derive(Deserialize)]
 struct Message {
@@ -37,7 +45,17 @@ async fn main() {
         .route("/posterino_string", post(posterino_string))
         .route("/posterino_json", post(posterino_json))
         .layer(
-            TraceLayer::new_for_http()
+            TraceLayer::new(SharedClassifier::new(StatusInRangeAsFailures::new(400..=599)))
+                .on_failure(|failure, _: Duration, _: &tracing::Span| {
+                    match failure {
+                        StatusInRangeFailureClass::StatusCode(status) => {
+                            error!("http_request_trace error: {status}");
+                        }
+                        StatusInRangeFailureClass::Error(_err) => {
+                            //custom errors
+                        }
+                    }
+                })
                 .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
                 .on_response(trace::DefaultOnResponse::new().level(Level::INFO))
         );
