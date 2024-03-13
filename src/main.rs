@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post},
+    routing::{get, post, delete},
     Router,
     response::Json,
     extract,
@@ -44,6 +44,7 @@ async fn main() {
         .route("/get_config", get(get_config))
         .route("/posterino_string", post(posterino_string))
         .route("/posterino_json", post(posterino_json))
+        .route("/dummy_delete", delete(dummy_delete))
         .layer(
             TraceLayer::new(SharedClassifier::new(StatusInRangeAsFailures::new(400..=599)))
                 .on_failure(|failure, _: Duration, _: &tracing::Span| {
@@ -110,3 +111,8 @@ async fn posterino_string(extract::Json(message): Json<Message>) -> Result<Strin
 async fn posterino_json(extract::Json(message): Json<Message>) -> Result<Json<Value>, StatusCode> {
     Ok(Json(json!({ "message": message.text })))
 }
+
+async fn dummy_delete() -> Result<Json<Value>, StatusCode> {
+    Ok(Json(json!({ "deleted": true })))
+}
+
