@@ -46,6 +46,7 @@ async fn main() {
         .route("/posterino_json", post(posterino_json))
         .route("/dummy_delete", delete(dummy_delete))
         .route("/dummy_put", put(dummy_put))
+        .route("/dummy_user", get(get_user).post(post_user).put(put_user).delete(delete_user))
         .layer(
             TraceLayer::new(SharedClassifier::new(StatusInRangeAsFailures::new(400..=599)))
                 .on_failure(|failure, _: Duration, _: &tracing::Span| {
@@ -121,3 +122,18 @@ async fn dummy_put() -> Result<Json<Value>, StatusCode> {
     Ok(Json(json!({ "new_created": true })))
 }
 
+async fn get_user() -> Result<Json<Value>, StatusCode> {
+    Ok(Json(json!({ "user_retrieved": true })))
+}
+
+async fn post_user() -> Result<Json<Value>, StatusCode> {
+    Ok(Json(json!({ "user_updated": true })))
+}
+
+async fn put_user() -> Result<Json<Value>, StatusCode> {
+    Ok(Json(json!({ "user_created": true })))
+}
+
+async fn delete_user() -> Result<Json<Value>, StatusCode> {
+    Ok(Json(json!({ "user_deleted": true })))
+}
