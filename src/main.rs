@@ -29,6 +29,11 @@ struct Message {
     text: String,
 }
 
+#[derive(Deserialize)]
+struct Flag {
+    flag: bool,
+}
+
 const CONFIG_KEY: &str = "configKey";
 const EMPTY_STR: &str = "empty";
 
@@ -47,6 +52,7 @@ async fn main() {
         .route("/dummy_delete", delete(dummy_delete))
         .route("/dummy_put", put(dummy_put))
         .route("/crud_user", get(get_user).post(post_user).put(put_user).delete(delete_user))
+        .route("/error_testerino", post(error_testerino))
         .layer(
             TraceLayer::new(SharedClassifier::new(StatusInRangeAsFailures::new(400..=599)))
                 .on_failure(|failure, _: Duration, _: &tracing::Span| {
@@ -136,4 +142,13 @@ async fn put_user() -> Result<Json<Value>, StatusCode> {
 
 async fn delete_user() -> Result<Json<Value>, StatusCode> {
     Ok(Json(json!({ "user_deleted": true })))
+}
+
+async fn error_testerino(extract::Json(flag): Json<Flag>) -> Result<Json<Value>, StatusCode> {
+    if(flag.flag) {
+        Err(StatusCode::INTERNAL_SERVER_ERROR)
+    } else {
+        Ok(Json(json!({ "trigger_error": flag.flag })))
+    }
+
 }
