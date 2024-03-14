@@ -46,7 +46,7 @@ async fn main() {
         .route("/posterino_json", post(posterino_json))
         .route("/dummy_delete", delete(dummy_delete))
         .route("/dummy_put", put(dummy_put))
-        .route("/dummy_user", get(get_user).post(post_user).put(put_user).delete(delete_user))
+        .route("/crud_user", get(get_user).post(post_user).put(put_user).delete(delete_user))
         .layer(
             TraceLayer::new(SharedClassifier::new(StatusInRangeAsFailures::new(400..=599)))
                 .on_failure(|failure, _: Duration, _: &tracing::Span| {
